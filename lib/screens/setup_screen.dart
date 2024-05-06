@@ -69,6 +69,24 @@ class _SetupScreenState extends State<SetupScreen> {
               style: TextStyle(fontSize: 24.0),
             ),
             SegmentedButton<int>(
+              showSelectedIcon: false,
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                    (Set<MaterialState> states) {
+                  if (states.contains(MaterialState.selected)) {
+                    return Theme.of(context).colorScheme.primary;
+                  }
+                  return Theme.of(context).colorScheme.surface;
+                }),
+                foregroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                    if (states.contains(MaterialState.selected)) {
+                      return Theme.of(context).colorScheme.onPrimary;
+                    }
+                    return Theme.of(context).colorScheme.onSurface;
+                  },
+                ),
+              ),
               segments: const [
                 ButtonSegment(value: 6, label: Text('6')),
                 ButtonSegment(value: 9, label: Text('9')),
@@ -81,22 +99,32 @@ class _SetupScreenState extends State<SetupScreen> {
                 });
               },
             ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => GameScreen(
-                      hskLevel: _selectedHskLevel,
-                      characterCount: _selectedCharacterCount,
-                    ),
-                  ),
-                );
-              },
-              child: const Text('Start the game'),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.all(16.0),
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GameScreen(
+                    hskLevel: _selectedHskLevel,
+                    characterCount: _selectedCharacterCount,
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.videogame_asset),
+            label: const Text('Start the game'),
+          ),
         ),
       ),
     );

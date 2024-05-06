@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Character Match',
       theme: ThemeData(
-        colorSchemeSeed: Colors.cyan,
+        colorSchemeSeed: Colors.teal,
         useMaterial3: true,
         brightness: Brightness.dark,
       ),

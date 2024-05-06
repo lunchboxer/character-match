@@ -23,6 +23,7 @@ class _GameScreenState extends State<GameScreen> {
   List<String> _characters = [];
   List<String> _matches = [];
   List<int> _selectedCards = [];
+  final Map<String, String> _pronunciations = {};
   bool _isCorrect = false;
   bool _roundComplete = false;
   int _roundCount = 1;
@@ -76,11 +77,15 @@ class _GameScreenState extends State<GameScreen> {
               .addAll(validCharacters.getRange(0, 2).toList());
           characterList.addAll(matchingCharacters);
           selectedPinyinKeys.add(pinyinKey);
+          _pronunciations[matchingCharacters[0]] = pinyinKey;
+          _pronunciations[matchingCharacters[1]] = pinyinKey;
         } else {
           // add one character from those found to our list
-          characterList
-              .add(validCharacters[Random().nextInt(validCharacters.length)]);
+          final newCharacter =
+              validCharacters[Random().nextInt(validCharacters.length)];
+          characterList.add(newCharacter);
           selectedPinyinKeys.add(pinyinKey);
+          _pronunciations[newCharacter] = pinyinKey;
         }
       }
     }
@@ -189,13 +194,23 @@ class _GameScreenState extends State<GameScreen> {
                         color: bgcolor,
                         borderRadius: BorderRadius.circular(8.0),
                       ),
-                      child: Center(
-                        child: Text(
-                          _characters[index],
-                          style: const TextStyle(
-                            fontSize: 32.0,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _characters[index],
+                            style: const TextStyle(
+                              fontSize: 32.0,
+                            ),
                           ),
-                        ),
+                          if (_roundComplete)
+                            Text(
+                              _pronunciations[_characters[index]] ?? '',
+                              style: const TextStyle(
+                                fontSize: 16.0,
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   );
