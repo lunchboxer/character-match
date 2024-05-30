@@ -64,6 +64,7 @@ flutter:
   assets:
       - assets/characters-grouped-by-pinyin-and-level.json
       - assets/characters-pinyin.json
+      - assets/character-word.json
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

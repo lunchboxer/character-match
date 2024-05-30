@@ -23,12 +23,15 @@ class _GameScreenState extends State<GameScreen> {
   List<String> _characters = [];
   List<String> _matches = [];
   List<int> _selectedCards = [];
+  String? _selectedCharacter;
   final Map<String, String> _pronunciations = {};
   bool _isCorrect = false;
   bool _roundComplete = false;
   int _roundCount = 1;
   int _score = 0;
   final int _maxRounds = 10;
+// New variable to store the character-word.json data
+  Map<String, dynamic> _wordData = {};
 
   @override
   void initState() {
@@ -40,6 +43,9 @@ class _GameScreenState extends State<GameScreen> {
     final jsonData = await rootBundle
         .loadString('assets/characters-grouped-by-pinyin-and-level.json');
     final data = json.decode(jsonData);
+    final wordJsonData =
+        await rootBundle.loadString('assets/character-word.json');
+    final wordData = json.decode(wordJsonData);
 
     final allPinyinKeys = data.keys.toList();
     allPinyinKeys.shuffle();
@@ -92,7 +98,26 @@ class _GameScreenState extends State<GameScreen> {
     setState(() {
       _characters = characterList..shuffle();
       _matches = matchingCharacters;
+      _wordData = wordData;
     });
+  }
+
+  List<Widget> _getWordsAndDefinitions() {
+    if (_selectedCharacter == null) return [];
+
+    final characterWordData = _wordData[_selectedCharacter] ?? {};
+
+    final words = <Widget>[];
+    characterWordData.forEach((level, wordDefinitions) {
+      if (int.parse(level) <= widget.hskLevel) {
+        words.add(Text('Level $level:'));
+        wordDefinitions.forEach((word, definition) {
+          words.add(Text('- $word: $definition'));
+        });
+      }
+    });
+
+    return words;
   }
 
   void _handleCardTap(int index) {
@@ -168,7 +193,7 @@ class _GameScreenState extends State<GameScreen> {
               'Round: $_roundCount / $_maxRounds',
               style: const TextStyle(fontSize: 24),
             ),
-            const SizedBox(height: 16.0),
+            const SizedBox(height: 8.0),
             Expanded(
               child: GridView.builder(
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -187,7 +212,15 @@ class _GameScreenState extends State<GameScreen> {
                       : Theme.of(context).colorScheme.surfaceVariant;
 
                   return InkWell(
-                    onTap: () => _handleCardTap(index),
+                    onTap: () {
+                      if (_roundComplete) {
+                        setState(() {
+                          _selectedCharacter = _characters[index];
+                        });
+                      } else {
+                        _handleCardTap(index);
+                      }
+                    },
                     child: Container(
                       margin: const EdgeInsets.all(4.0),
                       decoration: BoxDecoration(
@@ -217,13 +250,32 @@ class _GameScreenState extends State<GameScreen> {
                 },
               ),
             ),
-            const SizedBox(height: 16.0),
             if (_roundComplete)
-              Center(
-                child: Text(
-                  _isCorrect ? 'Correct' : 'Wrong',
-                  style: const TextStyle(fontSize: 32.0),
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_selectedCharacter == null)
+                    Text(
+                      _isCorrect ? 'Correct' : 'Wrong',
+                      style: const TextStyle(fontSize: 32.0),
+                    ),
+                  const SizedBox(height: 8.0),
+                  if (_selectedCharacter == null)
+                    const Text(
+                        'Click any card to show words containing that character'),
+                  if (_selectedCharacter != null)
+                    // I'm not loving this fixed sized box. What about smaller or bigger screens?
+                    SizedBox(
+                      height: 300, // Adjust the height as needed
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: _getWordsAndDefinitions(),
+                        ),
+                      ),
+                    ),
+                ],
               ),
           ],
         ),
